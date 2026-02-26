@@ -1,0 +1,93 @@
+=> Core System
+
+-db.php → Database connection
+
+-config.php → SSLCommerz store ID + password
+
+
+
+=> Authentication
+
+-register.php
+
+-login.php
+
+-logout.php
+
+
+
+=> Public Pages
+
+-index.php → Show approved campaigns
+
+-campaign_details.php
+
+-donate.php → Donation form
+
+-payment_process.php → Sends data to SSLCommerz
+
+
+
+=>SSLCommerz Integration Files
+
+-sslcommerz_init.php → Initiates payment session
+
+-success.php → Payment success response
+
+-fail.php → Payment failure response
+
+-cancel.php → Payment cancel
+
+-ipn.php → Instant Payment Notification (important)
+
+
+
+=> Donor Dashboard
+
+-donor_dashboard.php
+
+-donation_history.php
+
+
+
+=>Organizer Section
+
+-organizer_dashboard.php
+
+-create_campaign.php
+
+-edit_campaign.php
+
+-delete_campaign.php
+
+-my_campaigns.php
+
+
+
+=> Admin Section
+
+-admin_dashboard.php
+
+-approve_campaign.php
+
+-reject_campaign.php
+
+-manage_users.php
+
+-view_all_donations.php
+
+-admin_logs.php
+
+
+
+=> Helper Files
+
+-update_raised_amount.php
+
+-progress_bar.php
+
+-header.php
+
+-footer.php
+
+
