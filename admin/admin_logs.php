@@ -1,12 +1,16 @@
 <?php
-include 'db.php';
-include 'header.php';
+session_start(); 
+include 'auth.php'; // start session
+include '../db.php';       // db.php is in parent folder
+include '../header.php';   // header.php is in parent folder
 
+// Only allow admins
 if(!isset($_SESSION['role']) || $_SESSION['role'] != 'admin'){
-    header("Location: index.php");
+    header("Location: login.php"); // redirect non-admin users to login
     exit();
 }
 
+// Fetch admin logs with admin names
 $sql = "SELECT a.*, u.full_name 
         FROM admin_logs a
         JOIN users u ON a.admin_id = u.id
@@ -77,15 +81,21 @@ td:nth-child(3){
     <th>Date</th>
 </tr>
 
-<?php while($row=mysqli_fetch_assoc($result)){ ?>
+<?php if(mysqli_num_rows($result) > 0): ?>
+    <?php while($row = mysqli_fetch_assoc($result)): ?>
 <tr>
-    <td><?php echo $row['full_name']; ?></td>
-    <td><?php echo $row['action']; ?></td>
+    <td><?php echo htmlspecialchars($row['full_name']); ?></td>
+    <td><?php echo htmlspecialchars($row['action']); ?></td>
     <td><?php echo $row['created_at']; ?></td>
 </tr>
-<?php } ?>
+    <?php endwhile; ?>
+<?php else: ?>
+<tr>
+    <td colspan="3" style="text-align:center;">No logs found.</td>
+</tr>
+<?php endif; ?>
 
 </table>
 </div>
 
-<?php include 'footer.php'; ?>
+<?php include '../footer.php'; ?>

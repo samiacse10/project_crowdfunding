@@ -1,18 +1,22 @@
 <?php
-include 'db.php';
-include 'header.php';
+session_start();
+include '../db.php';        // db.php is in parent folder
+include '../header.php';    // header.php is in parent folder
 
+// Only allow admins
 if(!isset($_SESSION['role']) || $_SESSION['role'] != 'admin'){
-    header("Location: index.php");
+    header("Location: login.php"); // redirect non-admin users
     exit();
 }
 
+// Fetch all donations with donor and campaign names
 $sql = "SELECT d.*, u.full_name, c.title 
         FROM donations d
         JOIN users u ON d.donor_id = u.id
-        JOIN campaigns c ON d.campaign_id = c.id";
+        JOIN campaigns c ON d.campaign_id = c.id
+        ORDER BY d.donated_at DESC";
 
-$result = mysqli_query($conn,$sql);
+$result = mysqli_query($conn, $sql);
 ?>
 
 <style>
@@ -78,17 +82,23 @@ td:nth-child(4){
     <th>Transaction ID</th>
 </tr>
 
-<?php while($row=mysqli_fetch_assoc($result)){ ?>
+<?php if(mysqli_num_rows($result) > 0): ?>
+    <?php while($row = mysqli_fetch_assoc($result)): ?>
 <tr>
-    <td><?php echo $row['full_name']; ?></td>
-    <td><?php echo $row['title']; ?></td>
-    <td>৳<?php echo $row['amount']; ?></td>
-    <td><?php echo ucfirst($row['payment_status']); ?></td>
-    <td><?php echo $row['transaction_id']; ?></td>
+    <td><?php echo htmlspecialchars($row['full_name']); ?></td>
+    <td><?php echo htmlspecialchars($row['title']); ?></td>
+    <td>৳<?php echo number_format($row['amount'], 2); ?></td>
+    <td><?php echo ucfirst(htmlspecialchars($row['payment_status'])); ?></td>
+    <td><?php echo htmlspecialchars($row['transaction_id']); ?></td>
 </tr>
-<?php } ?>
+    <?php endwhile; ?>
+<?php else: ?>
+<tr>
+    <td colspan="5" style="text-align:center;">No donations found.</td>
+</tr>
+<?php endif; ?>
 
 </table>
 </div>
 
-<?php include 'footer.php'; ?>
+<?php include '../footer.php'; ?>

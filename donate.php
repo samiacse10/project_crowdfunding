@@ -1,15 +1,19 @@
 <?php
-include 'db.php';
-include 'header.php';
-
 session_start();
+include 'db.php';
 
+// Get campaign ID safely
+$campaign_id = isset($_GET['id']) ? intval($_GET['id']) : 0;
+
+// Check login BEFORE including header
 if(!isset($_SESSION['user_id'])){
+    // Store a flash message in session
+    $_SESSION['flash_message'] = "Please login or register first to donate.";
     header("Location: login.php");
     exit();
 }
 
-$campaign_id = intval($_GET['id']);
+include 'header.php';
 ?>
 
 <style>
@@ -66,15 +70,11 @@ button:hover{
 <h2>Donate to Campaign</h2>
 
 <div class="donate-container">
-<form method="POST" action="payment_process.php">
-
-    <input type="hidden" name="campaign_id" value="<?php echo $campaign_id; ?>">
-
-    <input type="number" name="amount" placeholder="Enter Donation Amount (৳)" required>
-
-    <button type="submit" name="donate">Proceed to Payment</button>
-
-</form>
+    <form method="POST" action="payment_process.php">
+        <input type="hidden" name="campaign_id" value="<?php echo $campaign_id; ?>">
+        <input type="number" name="amount" placeholder="Enter Donation Amount (৳)" required>
+        <button type="submit" name="donate">Proceed to Payment</button>
+    </form>
 </div>
 
 <?php include 'footer.php'; ?>

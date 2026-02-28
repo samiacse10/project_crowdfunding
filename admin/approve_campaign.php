@@ -1,16 +1,19 @@
 <?php
-include 'db.php';
-include 'header.php';
-include 'progress_bar.php';
+session_start();
+include 'auth.php';
+include '../db.php';             // db.php is in parent folder
+include '../header.php';         // header.php is in parent folder
+include '../progress_bar.php';   // progress_bar.php is in parent folder
 
+// Only allow admins
 if(!isset($_SESSION['role']) || $_SESSION['role'] != 'admin'){
-    header("Location: index.php");
+    header("Location: login.php");
     exit();
 }
 
 /* Approve Campaign */
 if(isset($_GET['approve'])){
-    $id = $_GET['approve'];
+    $id = intval($_GET['approve']); // sanitize
     mysqli_query($conn,"UPDATE campaigns SET status='approved' WHERE id='$id'");
     header("Location: approve_campaign.php");
     exit();
@@ -18,13 +21,14 @@ if(isset($_GET['approve'])){
 
 /* Reject Campaign */
 if(isset($_GET['reject'])){
-    $id = $_GET['reject'];
+    $id = intval($_GET['reject']); // sanitize
     mysqli_query($conn,"UPDATE campaigns SET status='rejected' WHERE id='$id'");
     header("Location: approve_campaign.php");
     exit();
 }
 
-$result = mysqli_query($conn,"SELECT * FROM campaigns WHERE status='pending'");
+// Fetch pending campaigns
+$result = mysqli_query($conn,"SELECT * FROM campaigns WHERE status='pending' ORDER BY created_at DESC");
 ?>
 
 <style>
@@ -99,12 +103,13 @@ button:not(.danger):hover{
 <h2>Pending Campaigns</h2>
 
 <div class="campaign-container">
-<?php while($row=mysqli_fetch_assoc($result)){ ?>
+<?php if(mysqli_num_rows($result) > 0): ?>
+    <?php while($row=mysqli_fetch_assoc($result)): ?>
     <div class="campaign-card">
-        <h3><?php echo $row['title']; ?></h3>
+        <h3><?php echo htmlspecialchars($row['title']); ?></h3>
 
-        <p>Target: ৳<?php echo $row['target_amount']; ?></p>
-        <p>Raised: ৳<?php echo $row['raised_amount']; ?></p>
+        <p>Target: ৳<?php echo number_format($row['target_amount'],2); ?></p>
+        <p>Raised: ৳<?php echo number_format($row['raised_amount'],2); ?></p>
 
         <?php showProgress($row['raised_amount'],$row['target_amount']); ?>
 
@@ -118,7 +123,10 @@ button:not(.danger):hover{
             <button class="danger">Reject</button>
         </a>
     </div>
-<?php } ?>
+    <?php endwhile; ?>
+<?php else: ?>
+    <p style="text-align:center;">No pending campaigns found.</p>
+<?php endif; ?>
 </div>
 
-<?php include 'footer.php'; ?>
+<?php include '../footer.php'; ?>

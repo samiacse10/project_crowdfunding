@@ -1,21 +1,26 @@
 <?php
-include 'db.php';
-include 'header.php';
+session_start();
+include '../db.php'; // Database connection
 
+// Only allow admins BEFORE sending any output
 if(!isset($_SESSION['role']) || $_SESSION['role'] != 'admin'){
-    header("Location: index.php");
+    header("Location: ../login.php"); // redirect non-admin users
     exit();
 }
 
-/* Delete User */
+// Delete user
 if(isset($_GET['delete'])){
-    $id = $_GET['delete'];
+    $id = intval($_GET['delete']); // sanitize input
     mysqli_query($conn,"DELETE FROM users WHERE id='$id'");
     header("Location: manage_users.php");
     exit();
 }
 
-$result = mysqli_query($conn,"SELECT * FROM users");
+// Fetch all users
+$result = mysqli_query($conn,"SELECT * FROM users ORDER BY id ASC");
+
+// Include header AFTER all redirects
+include '../header.php';
 ?>
 
 <style>
@@ -91,22 +96,32 @@ button:hover{
     <th>Action</th>
 </tr>
 
-<?php while($row=mysqli_fetch_assoc($result)){ ?>
+<?php if(mysqli_num_rows($result) > 0): ?>
+    <?php while($row=mysqli_fetch_assoc($result)): ?>
 <tr>
     <td><?php echo $row['id']; ?></td>
-    <td><?php echo $row['full_name']; ?></td>
-    <td><?php echo $row['email']; ?></td>
-    <td><?php echo ucfirst($row['role']); ?></td>
+    <td><?php echo htmlspecialchars($row['full_name']); ?></td>
+    <td><?php echo htmlspecialchars($row['email']); ?></td>
+    <td><?php echo ucfirst(htmlspecialchars($row['role'])); ?></td>
     <td>
+        <?php if($row['role'] != 'admin'): ?>
         <a href="?delete=<?php echo $row['id']; ?>" 
            onclick="return confirm('Are you sure you want to delete this user?');">
             <button>Delete</button>
         </a>
+        <?php else: ?>
+            <span style="color:gray;">Protected</span>
+        <?php endif; ?>
     </td>
 </tr>
-<?php } ?>
+    <?php endwhile; ?>
+<?php else: ?>
+<tr>
+    <td colspan="5" style="text-align:center;">No users found.</td>
+</tr>
+<?php endif; ?>
 
 </table>
 </div>
 
-<?php include 'footer.php'; ?>
+<?php include '../footer.php'; ?>
